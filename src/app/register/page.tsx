@@ -1,4 +1,4 @@
-"use client"; // Indica que este é um componente do lado do cliente
+"use client"; 
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -11,7 +11,6 @@ import { useLoadScript, Autocomplete, GoogleMap, Marker } from "@react-google-ma
 import Image from "next/image";
 
 
-const LIBRARIES: ("places" | "drawing" | "geometry" | "localContext" | "visualization")[] = ["places"];
 
 
 const schema = z.object({
@@ -48,7 +47,8 @@ export default function RegisterPage() {
     mode: "onChange",
   });
 
-  
+  const LIBRARIES: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
+
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", 
     libraries: LIBRARIES, 

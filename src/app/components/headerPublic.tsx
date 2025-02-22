@@ -20,15 +20,7 @@ export default function HeaderPublic() {
           }}
         />
 
-        <div className="mr-10">
-          <button className=" text-white font-bold bg-[#EF8D2A] p-1 mr-10 w-30 rounded">
-            Entrar
-          </button>
 
-          <button className=" text-white font-bold bg-[#EF8D2A] p-1 w-35 rounded">
-            Cadastrar-se
-          </button>
-        </div>
       </header>
     </div>
   );

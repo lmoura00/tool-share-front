@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import HeaderPublic from '../components/headerPublic';
 import { useSession } from 'next-auth/react';
-import { useEffect } from 'react'; // Importe o useEffect
+import { useEffect } from 'react'; 
 
 const schema = z.object({
   email: z.string().email('Email inválido').nonempty('O campo email é obrigatório'),
