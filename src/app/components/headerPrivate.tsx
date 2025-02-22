@@ -8,7 +8,7 @@ export default function HeaderPrivate() {
     <div className="">
       <header className="bg-black flex items-center justify-between ">
         <Image
-          src="../assets/logo.png"
+          src="/assets/logo.png"
           alt=" "
           width={200}
           height={200}

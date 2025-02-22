@@ -1,62 +1,64 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
   return (
-    <div className="bg-[#EF8D2A]  h-screen antialiased ">
-      <header className="bg-black flex items-center justify-between ">
+    <div className="bg-[#EF8D2A] min-h-screen antialiased">
+      <header className="bg-black flex items-center justify-between p-4 md:p-6">
         <Image
           src="/assets/logo.png"
-          alt=" "
-          width={200}
-          height={200}
-          onClick={()=>{router.push('/')}}
+          alt="Logo"
+          width={150}
+          height={150}
+          onClick={() => router.push("/")}
+          className="cursor-pointer"
           style={{
-            paddingTop: "20px",
-            paddingLeft: "30px",
-            paddingBottom: "15px",
-            alignItems: "center",
+            paddingTop: "1rem",
+            paddingLeft: "1.5rem",
+            paddingBottom: "0.75rem",
           }}
         />
 
-        <div className="mr-10">
+        <div className="flex space-x-4">
           <button
-            className=" text-white font-bold bg-[#EF8D2A] p-1 mr-10 w-30 rounded"
-            onClick={()=>{router.push('/login')}}
+            className="text-white font-bold bg-[#EF8D2A] px-4 py-2 rounded hover:bg-[#cc7a24] transition-colors"
+            onClick={() => router.push("/login")}
           >
             Entrar
           </button>
-          <button 
-            className=" text-white font-bold bg-[#EF8D2A] p-1 w-35 rounded"
-            onClick={()=>{router.push('/register')}}
+          <button
+            className="text-white font-bold bg-[#EF8D2A] px-4 py-2 rounded hover:bg-[#cc7a24] transition-colors"
+            onClick={() => router.push("/register")}
           >
             Cadastrar-se
           </button>
         </div>
       </header>
 
-      <div className="flex  justify-between">
-        <div className="mt-72 ml-20">
-          <h1 className="text-[70px] font-bold ">
-            {" "}
+      <div className="flex flex-col md:flex-row justify-between items-center p-4 md:p-8">
+        <div className="text-center md:text-left mt-10 md:mt-0 md:ml-20">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold">
             <span className="block">Compartilhe</span> com{" "}
-            <span className=" text-white ">ToolShare</span>
+            <span className="text-white">ToolShare</span>
           </h1>
-          <button className=" text-white bg-black rounded p-3 mr-10 w-30 font-bold " onClick={()=>router.push('/login')}>
+          <button
+            className="text-white bg-black rounded px-6 py-3 mt-6 font-bold hover:bg-gray-800 transition-colors"
+            onClick={() => router.push("/login")}
+          >
             Entrar
           </button>
         </div>
 
-        <div className=" h-auto max-w-full  ">
+        <div className="mt-10 md:mt-0">
           <Image
             src="/assets/imagemHome.png"
             alt="Imagem da Home"
             width={800}
             height={600}
-            className="h-auto max-w-full absolute right-0 bottom-0 object-cover"
-            
+            className="w-full h-auto max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg absolute right-0 bottom-0 "
+            layout="responsive"
           />
         </div>
       </div>

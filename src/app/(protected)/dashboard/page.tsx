@@ -1,4 +1,5 @@
 'use client'; 
+import HeaderPrivate from '@/app/components/headerPrivate';
 import { useSession, signOut } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 
@@ -19,7 +20,10 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="h-screen bg-gray-100">
+      <header>
+        <HeaderPrivate/>
+      </header>
       <h1 className="text-2xl font-bold">Dashboard</h1>
       <p className="mt-4">Welcome to your dashboard, {session.user?.email}!</p>
 
