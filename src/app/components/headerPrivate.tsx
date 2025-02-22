@@ -27,7 +27,7 @@ export default function HeaderPrivate() {
           <input
             type="text"
             placeholder="Pesquisar ferramenta..."
-            className="w-full px-4 py-2 rounded-l focus:outline-none outline-none"
+            className="w-full px-4 py-2 rounded-l focus:outline-none outline-none "
           />
           <button className="bg-[#EF8D2A] text-white p-3 rounded-r hover:bg-[#cc7a24] transition-colors">
             <FaSearch />
