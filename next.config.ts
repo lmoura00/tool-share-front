@@ -2,7 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["i.ibb.co"], // Adicione o domínio do ImgBB
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.ibb.co",
+      },
+      {
+        protocol: "https",
+        hostname: "i.pinimg.com",
+      },
+    ],
   },
 };
 

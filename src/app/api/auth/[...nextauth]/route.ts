@@ -10,33 +10,67 @@ export const authOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
+      
         const res = await fetch('http://localhost:3333/session', {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { "Content-Type": "application/json" }
         });
+
         const user = await res.json();
 
         if (res.ok && user) {
-          return user;
+         
+          return {
+            id: user.id,
+            cpf: user.cpf,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            latitude: user.latitude,
+            longitude: user.longitude,
+            address: user.address,
+            image: user.image,
+            type: user.type,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            token: user.token, 
+          };
         }
-        return null;
+        return null; 
       }
     })
   ],
   callbacks: {
     async jwt({ token, user }) {
+     
       if (user) {
-        token.accessToken = user.token;
+        token.accessToken = user.token; 
+        token.user = { 
+          id: user.id,
+          cpf: user.cpf,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          latitude: user.latitude,
+          longitude: user.longitude,
+          address: user.address,
+          image: user.image,
+          type: user.type,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        };
       }
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken;
+      
+      session.accessToken = token.accessToken; 
+      session.user = token.user; 
       return session;
     }
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET, 
 };
 
 const handler = NextAuth(authOptions);
