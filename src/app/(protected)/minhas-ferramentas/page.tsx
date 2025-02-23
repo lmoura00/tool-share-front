@@ -1,14 +1,15 @@
 "use client";
 import HeaderPrivate from "@/app/components/headerPrivate";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ToolCard from "@/app/components/ToolCard";
 import { useEffect, useState } from "react";
 import Footer from "@/app/components/Footer";
+import AddToolModal from "@/app/components/AddToolModal";
 
 interface Tool {
   id: number;
-  userId: number; 
+  userId: number;
   name: string;
   description: string;
   price: number;
@@ -17,11 +18,12 @@ interface Tool {
   status: string;
 }
 
-export default function DashboardPage() {
+export default function MinhasFerramentas() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [tools, setTools] = useState<Tool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -46,12 +48,43 @@ export default function DashboardPage() {
       }
 
       const data = await response.json();
-      console.log(data.tools);
       setTools(data.tools);
     } catch (error) {
       console.error("Error fetching tools:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddTool = async (data: any) => {
+    try {
+      console.log(data);
+      const response = await fetch("http://localhost:3333/tool", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+        body: JSON.stringify({ ...data, userId: session?.user?.id, rating: 0 }),
+      });
+
+      if (response.ok) {
+        const newTool = await response.json();
+        setTools([...tools, newTool]);
+        if (!response.ok) {
+          const error = await response.json();
+          alert(
+            `Erro ao adicionar ferramenta: ${
+              error.message || "Verifique os dados e tente novamente."
+            }`
+          );
+        }
+      } else {
+        const error = await response.json();
+        alert(error.message || "Erro ao adicionar ferramenta");
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar ferramenta:", error);
     }
   };
 
@@ -73,34 +106,25 @@ export default function DashboardPage() {
           Bem vindo(a) a ToolShare, {session?.user?.name}!
         </h1>
 
-        <div className="mt-6">
-          <h2 className="text-lg md:text-xl font-semibold">Ferramentas Disponíveis</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
-            {tools
-              .filter(
-                (tool) =>
-                  tool.status === "disponível" && tool.userId !== session?.user?.id 
-              )
-              .map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  name={tool.name}
-                  price={`R$${tool.price.toFixed(2)}/h`}
-                  rating={tool.rating}
-                  image={tool.image}
-                  description={tool.description}
-                />
-              ))}
-          </div>
-        </div>
 
-        <div className="mt-10 mb-20">
-          <h2 className="text-lg md:text-xl font-semibold">Ferramentas Alugadas</h2>
+        <div className="mt-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg md:text-xl font-semibold">
+              Minhas Ferramentas Disponíveis
+            </h2>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-[#EF8D2A] text-white px-4 py-2 rounded-lg hover:bg-[#cc7a24]"
+            >
+              Adicionar Ferramenta
+            </button>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
             {tools
               .filter(
                 (tool) =>
-                  tool.status === "alugada" && tool.userId !== session?.user?.id 
+                  tool.status === "disponível" &&
+                  tool.userId === session?.user?.id
               )
               .map((tool) => (
                 <ToolCard
@@ -119,6 +143,13 @@ export default function DashboardPage() {
       <footer className="mt-auto">
         <Footer />
       </footer>
+
+
+      <AddToolModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddTool}
+      />
     </div>
   );
 }

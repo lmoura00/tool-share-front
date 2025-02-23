@@ -8,7 +8,8 @@ import Footer from "@/app/components/Footer";
 
 interface Tool {
   id: number;
-  userId: number; 
+  userId: number;
+  renterId?: number; 
   name: string;
   description: string;
   price: number;
@@ -17,7 +18,7 @@ interface Tool {
   status: string;
 }
 
-export default function DashboardPage() {
+export default function MinhasReservas() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [tools, setTools] = useState<Tool[]>([]);
@@ -73,34 +74,13 @@ export default function DashboardPage() {
           Bem vindo(a) a ToolShare, {session?.user?.name}!
         </h1>
 
-        <div className="mt-6">
-          <h2 className="text-lg md:text-xl font-semibold">Ferramentas Disponíveis</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
-            {tools
-              .filter(
-                (tool) =>
-                  tool.status === "disponível" && tool.userId !== session?.user?.id 
-              )
-              .map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  name={tool.name}
-                  price={`R$${tool.price.toFixed(2)}/h`}
-                  rating={tool.rating}
-                  image={tool.image}
-                  description={tool.description}
-                />
-              ))}
-          </div>
-        </div>
-
         <div className="mt-10 mb-20">
-          <h2 className="text-lg md:text-xl font-semibold">Ferramentas Alugadas</h2>
+          <h2 className="text-lg md:text-xl font-semibold">Ferramentas que Aluguei</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
             {tools
               .filter(
                 (tool) =>
-                  tool.status === "alugada" && tool.userId !== session?.user?.id 
+                  tool.status === "alugada" && tool.renterId === session?.user?.id 
               )
               .map((tool) => (
                 <ToolCard
