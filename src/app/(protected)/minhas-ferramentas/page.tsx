@@ -58,27 +58,22 @@ export default function MinhasFerramentas() {
 
   const handleAddTool = async (data: any) => {
     try {
-      console.log(data);
       const response = await fetch("http://localhost:3333/tool", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.accessToken}`,
         },
-        body: JSON.stringify({ ...data, userId: session?.user?.id, rating: 0 }),
+        body: JSON.stringify({
+          ...data,
+          userId: session?.user?.id,
+          rating: 0,
+        }),
       });
-
+  
       if (response.ok) {
         const newTool = await response.json();
         setTools([...tools, newTool]);
-        if (!response.ok) {
-          const error = await response.json();
-          alert(
-            `Erro ao adicionar ferramenta: ${
-              error.message || "Verifique os dados e tente novamente."
-            }`
-          );
-        }
       } else {
         const error = await response.json();
         alert(error.message || "Erro ao adicionar ferramenta");

@@ -8,7 +8,7 @@ import Image from "next/image";
 
 const toolSchema = z.object({
   name: z.string().nonempty("O campo nome é obrigatório"),
-  description: z.string().nonempty("O campo descrição é obrigatório"),
+  description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
   price: z.number().min(0, "O preço deve ser maior ou igual a 0"),
   category: z.string().nonempty("O campo categoria é obrigatório"),
   status: z.enum(["disponível", "alugada", "em manutenção"]),
