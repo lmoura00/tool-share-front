@@ -78,7 +78,6 @@ export default function MinhasReservas() {
   };
 
   const handleChat = (reservationId: number) => {
-
     console.log("Abrir chat para reserva:", reservationId);
   };
 
@@ -123,7 +122,6 @@ export default function MinhasReservas() {
     );
   }
 
-
   const categories = [
     "Ferramentas Elétricas",
     "Ferramentas Manuais",
@@ -145,6 +143,7 @@ export default function MinhasReservas() {
     date.setHours(date.getHours() - offset);
     return date;
   };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header>
@@ -155,10 +154,8 @@ export default function MinhasReservas() {
           Bem vindo(a) a ToolShare, {session?.user?.name}!
         </h1>
 
-        <div className="mt-10 mb-20 flex space-x-6">
-
-          <div className="flex flex-col space-y-6 w-64">
-
+        <div className="mt-10 mb-20 flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6">
+          <div className="flex flex-col space-y-6 w-full md:w-64">
             <div className="bg-[#EAEAEA] p-6 rounded-lg shadow-md">
               <h2 className="text-lg font-semibold mb-4">Tipo de Reserva</h2>
               <div className="space-y-3">
@@ -185,7 +182,6 @@ export default function MinhasReservas() {
               </div>
             </div>
 
-  
             <div className="bg-[#EAEAEA] p-6 rounded-lg shadow-md">
               <h2 className="text-lg font-semibold mb-4">
                 Categoria de Ferramenta
@@ -232,20 +228,18 @@ export default function MinhasReservas() {
                 filteredReservations.map((reservation) => (
                   <div
                     key={reservation.id}
-                    className="p-6 bg-white rounded-lg shadow-md flex items-start"
+                    className="p-6 bg-white rounded-lg shadow-md flex flex-col md:flex-row items-start"
                   >
-   
                     <Image
                       width={250}
                       height={250}
                       src={reservation.tool.image}
                       alt={reservation.tool.name}
-                      className="w-24 h-24 object-cover rounded-lg mr-6"
+                      className="w-full md:w-24 h-24 object-cover rounded-lg mb-4 md:mb-0 md:mr-6"
                     />
 
-
                     <div className="flex-grow">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                         <div>
                           <h3 className="text-lg font-semibold">
                             {reservation.tool.name}
@@ -254,8 +248,7 @@ export default function MinhasReservas() {
                             {reservation.tool.description}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-4">
-         
+                        <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 mt-4 md:mt-0">
                           <span
                             className={`px-3 py-1 rounded-full text-sm font-semibold ${
                               reservation.status === "confirmada"
@@ -267,7 +260,6 @@ export default function MinhasReservas() {
                           >
                             {reservation.status}
                           </span>
-
 
                           <button
                             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

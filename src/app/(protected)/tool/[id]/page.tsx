@@ -55,7 +55,7 @@ export default function ToolDetailsPage() {
   const [editPrice, setEditPrice] = useState<number>(0);
   const [editCategory, setEditCategory] = useState<string>("");
   const [editImage, setEditImage] = useState<string>("");
-  const [isUploading, setIsUploading] = useState<boolean>(false); 
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -89,7 +89,6 @@ export default function ToolDetailsPage() {
       setEditCategory(toolData.tool.category);
       setEditImage(toolData.tool.image);
 
-     
       const ownerResponse = await fetch(
         `http://localhost:3333/user/${toolData.tool.userId}`,
         {
@@ -125,19 +124,10 @@ export default function ToolDetailsPage() {
       return;
     }
 
-    
-    const startDateISO = new Date(
-      start.getTime() - start.getTimezoneOffset() * 60000
-    ).toISOString();
-    const endDateISO = new Date(
-      end.getTime() - end.getTimezoneOffset() * 60000
-    ).toISOString();
-
-    const hours =
-      (new Date(endDateISO).getTime() - new Date(startDateISO).getTime()) /
-      (1000 * 60 * 60);
+    const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     const total = hours * tool.price;
     setSubTotal(total);
+    setRentSubTotal(total);
   };
 
   const handleRentTool = async () => {
@@ -151,7 +141,6 @@ export default function ToolDetailsPage() {
       return;
     }
 
-  
     const startDateISO = new Date(
       start.getTime() - start.getTimezoneOffset() * 60000
     ).toISOString();
@@ -206,7 +195,7 @@ export default function ToolDetailsPage() {
 
       const data = await response.json();
       if (data.success) {
-        setEditImage(data.data.url); 
+        setEditImage(data.data.url);
       } else {
         alert("Erro ao fazer upload da imagem.");
       }
@@ -233,7 +222,7 @@ export default function ToolDetailsPage() {
   const handleEditTool = async () => {
     if (!validateEditForm()) return;
 
-    setIsUpdating(true); 
+    setIsUpdating(true);
     try {
       const response = await fetch(`http://localhost:3333/tool/${id}`, {
         method: "PUT",
@@ -259,12 +248,12 @@ export default function ToolDetailsPage() {
       setTool(updatedTool);
       setIsEditModalOpen(false);
       alert("Ferramenta atualizada com sucesso!");
-      await router.refresh()
+      await router.refresh();
     } catch (error) {
       console.error("Error updating tool:", error);
       alert(error.message || "Erro ao atualizar ferramenta.");
     } finally {
-      setIsUpdating(false); 
+      setIsUpdating(false);
     }
   };
 
@@ -283,7 +272,7 @@ export default function ToolDetailsPage() {
       }
 
       alert("Ferramenta excluída com sucesso!");
-      router.push("/dashboard"); 
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error deleting tool:", error);
       alert("Erro ao excluir ferramenta.");
@@ -318,7 +307,7 @@ export default function ToolDetailsPage() {
             <Image
               height={250}
               width={250}
-              src={tool ? tool.image : "/placeholder-image.jpg"} 
+              src={tool ? tool.image : "/placeholder-image.jpg"}
               alt={tool ? tool.name : "Ferramenta"}
               className="w-full h-64 object-contain rounded-lg"
             />
@@ -350,7 +339,6 @@ export default function ToolDetailsPage() {
             </span>
           </div>
 
-         
           <div className="mt-6 space-x-4">
             {isOwner ? (
               <>
@@ -385,7 +373,6 @@ export default function ToolDetailsPage() {
             )}
           </div>
 
-        
           {!isOwner && owner && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold">Contato do Proprietário</h3>
@@ -417,7 +404,6 @@ export default function ToolDetailsPage() {
         </div>
       </div>
 
-    
       {isEditModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -470,7 +456,7 @@ export default function ToolDetailsPage() {
                   accept="image/*"
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
-                      handleImageUpload(e.target.files[0]); 
+                      handleImageUpload(e.target.files[0]);
                     }
                   }}
                   className="w-full p-2 border rounded-lg"
@@ -501,7 +487,7 @@ export default function ToolDetailsPage() {
               <button
                 onClick={handleEditTool}
                 className="bg-[#EF8D2A] text-white px-4 py-2 rounded-lg hover:bg-[#cc7a24]"
-                disabled={isUpdating} 
+                disabled={isUpdating}
               >
                 {isUpdating ? "Salvando..." : "Salvar"}
               </button>
@@ -510,7 +496,6 @@ export default function ToolDetailsPage() {
         </div>
       )}
 
-    
       {isDeleteModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -535,7 +520,7 @@ export default function ToolDetailsPage() {
           </div>
         </div>
       )}
-     
+
       {isCalculateModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -593,7 +578,6 @@ export default function ToolDetailsPage() {
         </div>
       )}
 
-   
       {isRentModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
