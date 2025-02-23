@@ -70,7 +70,7 @@ export default function MinhasFerramentas() {
           rating: 0,
         }),
       });
-  
+
       if (response.ok) {
         const newTool = await response.json();
         setTools([...tools, newTool]);
@@ -91,6 +91,11 @@ export default function MinhasFerramentas() {
     );
   }
 
+
+  const userTools = tools.filter(
+    (tool) => tool.status === "disponível" && tool.userId === session?.user?.id
+  );
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header>
@@ -100,7 +105,6 @@ export default function MinhasFerramentas() {
         <h1 className="text-xl md:text-2xl font-bold">
           Bem vindo(a) a ToolShare, {session?.user?.name}!
         </h1>
-
 
         <div className="mt-6">
           <div className="flex justify-between items-center">
@@ -114,16 +118,16 @@ export default function MinhasFerramentas() {
               Adicionar Ferramenta
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
-            {tools
-              .filter(
-                (tool) =>
-                  tool.status === "disponível" &&
-                  tool.userId === session?.user?.id
-              )
-              .map((tool) => (
+
+
+          {userTools.length === 0 ? (
+            <p className="text-gray-600 mt-4">Nenhuma ferramenta adicionada.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
+              {userTools.map((tool) => (
                 <ToolCard
                   key={tool.id}
+                  id={tool.id}
                   name={tool.name}
                   price={`R$${tool.price.toFixed(2)}/h`}
                   rating={tool.rating}
@@ -131,14 +135,14 @@ export default function MinhasFerramentas() {
                   description={tool.description}
                 />
               ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
       <footer className="mt-auto">
         <Footer />
       </footer>
-
 
       <AddToolModal
         isOpen={isModalOpen}

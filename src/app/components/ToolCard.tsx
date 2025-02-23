@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
-import React from "react";
+import { useRouter } from "next/navigation";
 
 interface ToolCardProps {
+  id: number;
   name: string;
   price: string;
   rating: number;
@@ -9,27 +12,46 @@ interface ToolCardProps {
   description: string;
 }
 
-const ToolCard: React.FC<ToolCardProps> = ({ name, price, rating, image, description }) => {
+export default function ToolCard({
+  id,
+  name,
+  price,
+  rating,
+  image,
+  description,
+}: ToolCardProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    console.log('ID:', id)
+    router.push(`/tool/${id}`);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+    <div
+      onClick={handleClick}
+      className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+    >
       <Image
+        width={256} 
+        height={256} 
         src={image}
         alt={name}
-        width={100}
-        height={100}
-        className="w-full h-48 object-contain rounded-t-lg"
+        className="w-full h-64 object-contain"
       />
-      <div className="mt-4">
-        <h3 className="text-lg font-semibold">{name}</h3>
-        <p className="text-gray-600">{price}</p>
+      <div className="p-4">
+        <h3 className="text-lg font-bold">{name}</h3>
+        <p className="text-gray-700">{description}</p>
+        <p className="text-gray-700 mt-2">{price}</p>
         <div className="flex items-center mt-2">
-          <span className="text-yellow-500">{"★".repeat(Math.floor(rating))}</span>
-          <span className="text-gray-400 ml-1">{"☆".repeat(5 - Math.floor(rating))}</span>
+          <span className="text-yellow-500">
+            {"★".repeat(Math.floor(rating))}
+          </span>
+          <span className="text-gray-400 ml-0">
+            {"☆".repeat(5 - Math.floor(rating))}
+          </span>
         </div>
-        <p className="text-sm text-gray-500 mt-2">{description}</p>
       </div>
     </div>
   );
-};
-
-export default ToolCard;
+}

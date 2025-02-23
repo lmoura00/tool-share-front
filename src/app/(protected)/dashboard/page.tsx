@@ -1,6 +1,6 @@
 "use client";
 import HeaderPrivate from "@/app/components/headerPrivate";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import ToolCard from "@/app/components/ToolCard";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import Footer from "@/app/components/Footer";
 
 interface Tool {
   id: number;
-  userId: number; 
+  userId: number;
   name: string;
   description: string;
   price: number;
@@ -46,7 +46,6 @@ export default function DashboardPage() {
       }
 
       const data = await response.json();
-      console.log(data.tools);
       setTools(data.tools);
     } catch (error) {
       console.error("Error fetching tools:", error);
@@ -63,6 +62,11 @@ export default function DashboardPage() {
     );
   }
 
+  const availableTools = tools.filter(
+    (tool) => tool.status === "disponível" && tool.userId !== session?.user?.id
+  );
+  const rentedTools = tools.filter((tool) => tool.status === "alugada");
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <header>
@@ -74,16 +78,17 @@ export default function DashboardPage() {
         </h1>
 
         <div className="mt-6">
-          <h2 className="text-lg md:text-xl font-semibold">Ferramentas Disponíveis</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
-            {tools
-              .filter(
-                (tool) =>
-                  tool.status === "disponível" && tool.userId !== session?.user?.id 
-              )
-              .map((tool) => (
+          <h2 className="text-lg md:text-xl font-semibold">
+            Ferramentas Disponíveis
+          </h2>
+          {availableTools.length === 0 ? (
+            <p className="text-gray-600 mt-4">Nenhuma ferramenta disponível.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
+              {availableTools.map((tool) => (
                 <ToolCard
                   key={tool.id}
+                  id={tool.id}
                   name={tool.name}
                   price={`R$${tool.price.toFixed(2)}/h`}
                   rating={tool.rating}
@@ -91,20 +96,22 @@ export default function DashboardPage() {
                   description={tool.description}
                 />
               ))}
-          </div>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 mb-20">
-          <h2 className="text-lg md:text-xl font-semibold">Ferramentas Alugadas</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
-            {tools
-              .filter(
-                (tool) =>
-                  tool.status === "alugada" && tool.userId !== session?.user?.id 
-              )
-              .map((tool) => (
+          <h2 className="text-lg md:text-xl font-semibold">
+            Ferramentas Alugadas
+          </h2>
+          {rentedTools.length === 0 ? (
+            <p className="text-gray-600 mt-4">Nenhuma ferramenta alugada.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
+              {rentedTools.map((tool) => (
                 <ToolCard
                   key={tool.id}
+                  id={tool.id}
                   name={tool.name}
                   price={`R$${tool.price.toFixed(2)}/h`}
                   rating={tool.rating}
@@ -112,7 +119,8 @@ export default function DashboardPage() {
                   description={tool.description}
                 />
               ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
