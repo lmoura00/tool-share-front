@@ -55,9 +55,9 @@ export default function Home() {
           <Image
             src="/assets/imagemHome.png"
             alt="Imagem da Home"
-            width={800}
-            height={600}
-            className="w-full h-auto max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg absolute right-0 bottom-0 "
+            width={720}
+            height={329}
+            className="w-full h-auto max-w-screen-sm md:max-w-screen-md lg:max-w-screen-lg absolute right-0 bottom-0"
             layout="responsive"
           />
         </div>
