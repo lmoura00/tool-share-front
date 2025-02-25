@@ -44,17 +44,23 @@ export default function MinhasReservas() {
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
-      fetchReservations();
+      fetchReservations(); 
+
+      
+      const intervalId = setInterval(fetchReservations, 1000);
+
+
+      return () => clearInterval(intervalId);
     } else if (sessionStatus === "unauthenticated") {
       router.push("/login");
     }
-  }, [sessionStatus, router, activeTab, selectedCategory]); 
+  }, [sessionStatus, router, activeTab, selectedCategory]);
 
   const fetchReservations = async () => {
     try {
       let endpoint = `${api}/reservation`;
       if (activeTab === "recebidas") {
-        endpoint = `${api}/reservation/received`;
+        endpoint = `${api}/reservations/received`;
       }
 
       const response = await fetch(endpoint, {
@@ -88,7 +94,7 @@ export default function MinhasReservas() {
   ) => {
     try {
       const response = await fetch(
-        `${api}/reservation/${reservationId}/status`,
+        `${api}/reservations/${reservationId}/status`,
         {
           method: "PUT",
           headers: {
@@ -100,9 +106,13 @@ export default function MinhasReservas() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update reservation status");
+        throw new Error("Falha ao atualizar o status da reserva");
       }
 
+      const data = await response.json();
+      console.log(data.message); 
+
+  
       setReservations((prevReservations) =>
         prevReservations.map((reservation) =>
           reservation.id === reservationId
@@ -111,7 +121,8 @@ export default function MinhasReservas() {
         )
       );
     } catch (error) {
-      console.error("Error updating reservation status:", error);
+      console.error("Erro ao atualizar o status da reserva:", error);
+      alert("Erro ao atualizar o status da reserva");
     }
   };
 
@@ -216,7 +227,7 @@ export default function MinhasReservas() {
           </div>
 
           <div className="flex-grow">
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
               {filteredReservations.length === 0 ? (
                 <div className="p-6 bg-white rounded-lg shadow-md text-center">
                   <p className="text-gray-600">
@@ -239,13 +250,13 @@ export default function MinhasReservas() {
                       className="w-full md:w-24 h-24 object-cover rounded-lg mb-4 md:mb-0 md:mr-6"
                     />
 
-                    <div className="flex-grow">
+                    <div className="flex-grow w-full">
                       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-                        <div>
+                        <div className="w-full md:w-2/3">
                           <h3 className="text-lg font-semibold">
                             {reservation.tool.name}
                           </h3>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-600 break-words whitespace-normal overflow-hidden overflow-ellipsis max-h-20">
                             {reservation.tool.description}
                           </p>
                         </div>

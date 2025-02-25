@@ -5,7 +5,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 
-
 const toolSchema = z.object({
   name: z.string().nonempty("O campo nome é obrigatório"),
   description: z.string().min(10, "A descrição deve ter pelo menos 10 caracteres"),
@@ -69,8 +68,8 @@ export default function AddToolModal({ isOpen, onClose, onSubmit }: AddToolModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto overflow-y-auto max-h-[90vh]">
         <h2 className="text-xl font-bold mb-4">Adicionar Nova Ferramenta</h2>
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <div className="mb-4">
@@ -168,17 +167,17 @@ export default function AddToolModal({ isOpen, onClose, onSubmit }: AddToolModal
             )}
           </div>
 
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4">
             <button
               type="button"
               onClick={onClose}
-              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 w-full sm:w-auto"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="bg-[#EF8D2A] text-white px-4 py-2 rounded-lg hover:bg-[#cc7a24]"
+              className="bg-[#EF8D2A] text-white px-4 py-2 rounded-lg hover:bg-[#cc7a24] w-full sm:w-auto"
             >
               Adicionar
             </button>

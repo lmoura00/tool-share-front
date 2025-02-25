@@ -40,15 +40,11 @@ export default function ToolDetailsPage() {
   const [owner, setOwner] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [isCalculateModalOpen, setIsCalculateModalOpen] = useState(false);
+  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [subTotal, setSubTotal] = useState<number>(0);
-
-  const [isRentModalOpen, setIsRentModalOpen] = useState(false);
-  const [rentStartDate, setRentStartDate] = useState<string>("");
-  const [rentEndDate, setRentEndDate] = useState<string>("");
-  const [rentSubTotal, setRentSubTotal] = useState<number>(0);
+  const [isCalculating, setIsCalculating] = useState(false);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState<string>("");
@@ -128,14 +124,13 @@ export default function ToolDetailsPage() {
     const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     const total = hours * tool.price;
     setSubTotal(total);
-    setRentSubTotal(total);
   };
 
   const handleRentTool = async () => {
-    if (!rentStartDate || !rentEndDate || !tool) return;
+    if (!startDate || !endDate || !tool) return;
 
-    const start = new Date(rentStartDate);
-    const end = new Date(rentEndDate);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
     if (end <= start) {
       alert("A data final deve ser maior que a data inicial.");
@@ -171,7 +166,7 @@ export default function ToolDetailsPage() {
         console.error("Erro do backend:", errorData);
         throw new Error("Failed to rent tool");
       }
-      console.log(response);
+
       alert("Ferramenta alugada com sucesso!");
       setIsRentModalOpen(false);
     } catch (error) {
@@ -357,20 +352,12 @@ export default function ToolDetailsPage() {
                 </button>
               </>
             ) : (
-              <>
-                <button
-                  onClick={() => setIsCalculateModalOpen(true)}
-                  className="bg-[#EF8D2A] text-white px-4 py-2 rounded-lg hover:bg-[#cc7a24]"
-                >
-                  Calcular Aluguel
-                </button>
-                <button
-                  onClick={() => setIsRentModalOpen(true)}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-                >
-                  Alugar Ferramenta
-                </button>
-              </>
+              <button
+                onClick={() => setIsRentModalOpen(true)}
+                className="bg-[#EF8D2A] text-white px-4 py-2 rounded-lg hover:bg-[#cc7a24]"
+              >
+                Alugar Ferramenta
+              </button>
             )}
           </div>
 
@@ -522,10 +509,10 @@ export default function ToolDetailsPage() {
         </div>
       )}
 
-      {isCalculateModalOpen && (
+      {isRentModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Calcular Aluguel</h2>
+            <h2 className="text-xl font-bold mb-4">Alugar Ferramenta</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">
@@ -563,7 +550,7 @@ export default function ToolDetailsPage() {
             </div>
             <div className="flex justify-end space-x-4 mt-6">
               <button
-                onClick={() => setIsCalculateModalOpen(false)}
+                onClick={() => setIsRentModalOpen(false)}
                 className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
               >
                 Cancelar
@@ -574,62 +561,11 @@ export default function ToolDetailsPage() {
               >
                 Calcular
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isRentModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Alugar Ferramenta</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Data Inicial
-                </label>
-                <input
-                  type="datetime-local"
-                  value={rentStartDate}
-                  onChange={(e) => setRentStartDate(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Data Final
-                </label>
-                <input
-                  type="datetime-local"
-                  value={rentEndDate}
-                  onChange={(e) => setRentEndDate(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Sub Total
-                </label>
-                <input
-                  type="text"
-                  value={`R$${rentSubTotal.toFixed(2)}`}
-                  readOnly
-                  className="w-full p-2 border rounded-lg bg-gray-100"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-4 mt-6">
-              <button
-                onClick={() => setIsRentModalOpen(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-              >
-                Cancelar
-              </button>
               <button
                 onClick={handleRentTool}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
               >
-                Solicitar Aluguel
+                Alugar
               </button>
             </div>
           </div>

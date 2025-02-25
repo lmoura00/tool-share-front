@@ -3,15 +3,97 @@ import { FaBell, FaSearch } from "react-icons/fa";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "../api";
 
 export default function HeaderPrivate() {
   const router = useRouter();
   const { data: session } = useSession();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
+  };
+
+  // Função para buscar notificações
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch(`${api}/notifications`, {
+        headers: {
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+      const data = await response.json();
+      setNotifications(data);
+    } catch (error) {
+      console.error("Erro ao buscar notificações:", error);
+    }
+  };
+
+ 
+  useEffect(() => {
+    fetchNotifications(); 
+
+    const interval = setInterval(fetchNotifications, 1000); 
+
+    
+    return () => clearInterval(interval);
+  }, [session]);
+
+  const toggleNotification = () => {
+    setIsNotificationVisible(!isNotificationVisible);
+  };
+
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      const response = await fetch(`${api}/notifications/${notificationId}/mark-as-read`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao marcar notificação como lida');
+      }
+
+      // Atualiza o estado das notificações para refletir a mudança
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notification) =>
+          notification.id === notificationId ? { ...notification, read: true } : notification
+        )
+      );
+    } catch (error) {
+      console.error('Erro ao marcar notificação como lida:', error);
+      alert('Erro ao marcar notificação como lida');
+    }
+  };
+
+  const deleteNotification = async (notificationId) => {
+    try {
+      const response = await fetch(`${api}/notifications/${notificationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao apagar notificação');
+      }
+
+      // Atualiza o estado das notificações removendo a notificação apagada
+      setNotifications((prevNotifications) =>
+        prevNotifications.filter((notification) => notification.id !== notificationId)
+      );
+    } catch (error) {
+      console.error('Erro ao apagar notificação:', error);
+      alert('Erro ao apagar notificação');
+    }
   };
 
   const handleLogout = async () => {
@@ -23,6 +105,9 @@ export default function HeaderPrivate() {
       alert("Failed to logout. Please try again.");
     }
   };
+
+  // Contar notificações não lidas
+  const unreadNotificationsCount = notifications.filter(notification => !notification.read).length;
 
   return (
     <div>
@@ -51,9 +136,56 @@ export default function HeaderPrivate() {
         </div>
 
         <div className="flex items-center space-x-4 mr-10 relative">
-          <button className="text-white font-bold bg-[#EF8D2A] p-3 rounded-full hover:bg-[#cc7a24] transition-colors">
+          <button
+            onClick={toggleNotification}
+            className="text-white font-bold bg-[#EF8D2A] p-3 rounded-full hover:bg-[#cc7a24] transition-colors relative"
+          >
             <FaBell />
+            {unreadNotificationsCount > 0 && (
+              <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                {unreadNotificationsCount}
+              </span>
+            )}
           </button>
+
+          {isNotificationVisible && (
+            <div className="absolute top-14 right-0 bg-white rounded-lg shadow-lg w-64 z-50">
+              <div className="p-4">
+                <h3 className="text-black font-semibold mb-2">Notificações</h3>
+                <hr className="my-2" />
+                {notifications.length > 0 ? (
+                  notifications.map((notification, index) => (
+                    <div key={index} className="text-gray-700 py-2 flex justify-between items-center">
+                      <div>
+                        {notification.message}
+                        {notification.read && <span className="text-sm text-gray-500"> (Lida)</span>}
+                      </div>
+                      <div className="flex space-x-2">
+                        {!notification.read && (
+                          <button
+                            onClick={() => markNotificationAsRead(notification.id)}
+                            className="text-sm text-blue-500 hover:text-blue-700"
+                          >
+                            Marcar como lida
+                          </button>
+                        )}
+                        <button
+                          onClick={() => deleteNotification(notification.id)}
+                          className="text-sm text-red-500 hover:text-red-700"
+                        >
+                          Apagar
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-700 py-2">
+                    Você não tem notificações
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {session?.user?.image && (
             <button
