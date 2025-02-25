@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ToolCard from "@/app/components/ToolCard";
 import { useEffect, useState } from "react";
 import Footer from "@/app/components/Footer";
+import { api } from "@/app/api";
 
 interface Tool {
   id: number;
@@ -33,7 +34,7 @@ export default function DashboardPage() {
 
   const fetchTools = async () => {
     try {
-      const response = await fetch("http://localhost:3333/tool", {
+      const response = await fetch(`${api}/tool`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import HeaderPrivate from "@/app/components/headerPrivate";
 import Footer from "@/app/components/Footer";
 import Image from "next/image";
+import { api } from "@/app/api";
 
 interface Tool {
   id: number;
@@ -69,7 +70,7 @@ export default function ToolDetailsPage() {
 
   const fetchToolDetails = async () => {
     try {
-      const toolResponse = await fetch(`http://localhost:3333/tool/${id}`, {
+      const toolResponse = await fetch(`${api}/tool/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +91,7 @@ export default function ToolDetailsPage() {
       setEditImage(toolData.tool.image);
 
       const ownerResponse = await fetch(
-        `http://localhost:3333/user/${toolData.tool.userId}`,
+        `${api}/user/${toolData.tool.userId}`,
         {
           method: "GET",
           headers: {
@@ -156,7 +157,7 @@ export default function ToolDetailsPage() {
     };
 
     try {
-      const response = await fetch("http://localhost:3333/reservation", {
+      const response = await fetch(`${api}/reservation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -224,7 +225,7 @@ export default function ToolDetailsPage() {
 
     setIsUpdating(true);
     try {
-      const response = await fetch(`http://localhost:3333/tool/${id}`, {
+      const response = await fetch(`${api}/tool/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -259,7 +260,7 @@ export default function ToolDetailsPage() {
 
   const handleDeleteTool = async () => {
     try {
-      const response = await fetch(`http://localhost:3333/tool/${id}`, {
+      const response = await fetch(`${api}/tool/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

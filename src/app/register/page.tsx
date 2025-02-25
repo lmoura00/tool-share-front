@@ -9,6 +9,7 @@ import HeaderPublic from "../components/headerPublic";
 import { useState, useRef } from "react";
 import { useLoadScript, Autocomplete, GoogleMap, Marker } from "@react-google-maps/api";
 import Image from "next/image";
+import { api } from "../api";
 
 
 
@@ -119,7 +120,7 @@ export default function RegisterPage() {
         longitude: longitude?.toString() || null,
       };
 
-      const response = await fetch("http://localhost:3333/user", {
+      const response = await fetch(`${api}/user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

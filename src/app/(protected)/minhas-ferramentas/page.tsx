@@ -6,6 +6,7 @@ import ToolCard from "@/app/components/ToolCard";
 import { useEffect, useState } from "react";
 import Footer from "@/app/components/Footer";
 import AddToolModal from "@/app/components/AddToolModal";
+import { api } from "@/app/api";
 
 interface Tool {
   id: number;
@@ -35,7 +36,7 @@ export default function MinhasFerramentas() {
 
   const fetchTools = async () => {
     try {
-      const response = await fetch("http://localhost:3333/tool", {
+      const response = await fetch(`${api}/tool`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export default function MinhasFerramentas() {
 
   const handleAddTool = async (data: any) => {
     try {
-      const response = await fetch("http://localhost:3333/tool", {
+      const response = await fetch(`${api}/tool`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,10 +71,10 @@ export default function MinhasFerramentas() {
           rating: 0,
         }),
       });
-
+  
       if (response.ok) {
-        const newTool = await response.json();
-        setTools([...tools, newTool]);
+        await fetchTools(); 
+        setIsModalOpen(false); 
       } else {
         const error = await response.json();
         alert(error.message || "Erro ao adicionar ferramenta");

@@ -1,3 +1,4 @@
+import { api } from '@/app/api';
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
@@ -9,9 +10,9 @@ export const authOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" }
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
       
-        const res = await fetch('http://localhost:3333/session', {
+        const res = await fetch(`${api}/session`, {
           method: 'POST',
           body: JSON.stringify(credentials),
           headers: { "Content-Type": "application/json" }

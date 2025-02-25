@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Footer from "@/app/components/Footer";
 import Image from "next/image";
+import { api } from "@/app/api";
 
 interface Reservation {
   id: number;
@@ -51,9 +52,9 @@ export default function MinhasReservas() {
 
   const fetchReservations = async () => {
     try {
-      let endpoint = "http://localhost:3333/reservation";
+      let endpoint = `${api}/reservation`;
       if (activeTab === "recebidas") {
-        endpoint = "http://localhost:3333/reservations/received";
+        endpoint = `${api}/reservation/received`;
       }
 
       const response = await fetch(endpoint, {
@@ -87,7 +88,7 @@ export default function MinhasReservas() {
   ) => {
     try {
       const response = await fetch(
-        `http://localhost:3333/reservations/${reservationId}/status`,
+        `${api}/reservation/${reservationId}/status`,
         {
           method: "PUT",
           headers: {
