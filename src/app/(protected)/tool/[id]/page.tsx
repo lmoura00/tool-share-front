@@ -290,7 +290,7 @@ export default function ToolDetailsPage() {
   const isOwner = tool.userId === session?.user?.id;
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col pb-10 mb-5">
       <header>
         <HeaderPrivate />
       </header>

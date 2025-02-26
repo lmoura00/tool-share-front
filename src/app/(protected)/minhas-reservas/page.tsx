@@ -157,7 +157,7 @@ export default function MinhasReservas() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col mb-11">
       <header>
         <HeaderPrivate />
       </header>

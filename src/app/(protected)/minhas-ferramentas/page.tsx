@@ -98,7 +98,7 @@ export default function MinhasFerramentas() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col mb-10">
       <header>
         <HeaderPrivate />
       </header>

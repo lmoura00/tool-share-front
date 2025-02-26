@@ -1,1 +1,1 @@
-export const api = 'http://192.168.0.23:3333'
+export const api = 'http://localhost:3333'
