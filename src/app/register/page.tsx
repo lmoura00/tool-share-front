@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -11,20 +11,16 @@ import { useLoadScript, Autocomplete, GoogleMap, Marker } from "@react-google-ma
 import Image from "next/image";
 import { api } from "../api";
 
-
-
-
 const schema = z.object({
   name: z.string().nonempty("O campo nome é obrigatório"),
   email: z.string().email("Email inválido").nonempty("O campo email é obrigatório"),
   password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("O campo senha é obrigatório"),
   phone: z.string().nonempty("O campo telefone é obrigatório"),
   cpf: z.string().nonempty("O campo CPF é obrigatório"),
-  type: z.string().nonempty("O campo tipo é obrigatório"),
   address: z.string().nonempty("O campo endereço é obrigatório"),
   latitude: z.string().optional(),
   longitude: z.string().optional(),
-  image: z.string().optional(), 
+  image: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -33,8 +29,8 @@ export default function RegisterPage() {
   const router = useRouter();
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null); 
-  const [isUploading, setIsUploading] = useState<boolean>(false); 
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
 
@@ -51,10 +47,9 @@ export default function RegisterPage() {
   const LIBRARIES: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "", 
-    libraries: LIBRARIES, 
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    libraries: LIBRARIES,
   });
-
 
   const handleImageUpload = async (file: File) => {
     setIsUploading(true);
@@ -72,8 +67,8 @@ export default function RegisterPage() {
 
       const data = await response.json();
       if (data.success) {
-        setImageUrl(data.data.url); 
-        setValue("image", data.data.url); 
+        setImageUrl(data.data.url);
+        setValue("image", data.data.url);
       } else {
         alert("Erro ao fazer upload da imagem.");
       }
@@ -85,15 +80,12 @@ export default function RegisterPage() {
     }
   };
 
-  
   const onPlaceChanged = () => {
     if (autocompleteRef.current) {
       const place = autocompleteRef.current.getPlace();
 
-   
       const address = place.formatted_address || "";
       setValue("address", address);
-
 
       const location = place.geometry?.location;
       if (location) {
@@ -104,7 +96,6 @@ export default function RegisterPage() {
         setValue("latitude", lat.toString());
         setValue("longitude", lng.toString());
 
-        
         if (mapRef.current) {
           mapRef.current.panTo({ lat, lng });
         }
@@ -140,7 +131,7 @@ export default function RegisterPage() {
   };
 
   if (!isLoaded) {
-    return <div>Carregando...</div>; 
+    return <div>Carregando...</div>;
   }
 
   return (
@@ -236,22 +227,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="mb-3">
-              <h2 className="text-black font-medium mb-2">Tipo</h2>
-              <select
-                {...register("type")}
-                className="w-full p-2 rounded-lg border-2 border-black"
-              >
-                <option value="locador">Locador</option>
-                <option value="locatario">Locatário</option>
-              </select>
-              {errors.type && (
-                <span className="text-red-500 text-sm">
-                  {errors.type.message}
-                </span>
-              )}
-            </div>
-
-            <div className="mb-3">
               <h2 className="text-black font-medium mb-2">Endereço</h2>
               <Autocomplete
                 onLoad={(autocomplete) => {
@@ -259,8 +234,8 @@ export default function RegisterPage() {
                 }}
                 onPlaceChanged={onPlaceChanged}
                 options={{
-                  types: ["establishment", "geocode"], 
-                  componentRestrictions: { country: "br" }, 
+                  types: ["establishment", "geocode"],
+                  componentRestrictions: { country: "br" },
                 }}
               >
                 <input

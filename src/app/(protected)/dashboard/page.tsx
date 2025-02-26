@@ -26,11 +26,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetchTools();
+      fetchTools(); // Fetch tools immediately on component mount
+
+      const intervalId = setInterval(fetchTools, 1000); // Fetch tools every 1 second
+
+      return () => clearInterval(intervalId); // Cleanup interval on component unmount
     } else if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, router]);
+  }, [status, router, session?.accessToken]); // Add session?.accessToken to dependency array
 
   const fetchTools = async () => {
     try {
