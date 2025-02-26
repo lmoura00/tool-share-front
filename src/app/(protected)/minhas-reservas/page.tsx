@@ -44,11 +44,10 @@ export default function MinhasReservas() {
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
-      fetchReservations(); 
+      fetchReservations();
 
-      
+      // Atualiza as reservas a cada segundo (opcional)
       const intervalId = setInterval(fetchReservations, 1000);
-
 
       return () => clearInterval(intervalId);
     } else if (sessionStatus === "unauthenticated") {
@@ -110,9 +109,9 @@ export default function MinhasReservas() {
       }
 
       const data = await response.json();
-      console.log(data.message); 
+      console.log(data.message);
 
-  
+      // Atualiza o status da reserva no estado local
       setReservations((prevReservations) =>
         prevReservations.map((reservation) =>
           reservation.id === reservationId
@@ -123,6 +122,34 @@ export default function MinhasReservas() {
     } catch (error) {
       console.error("Erro ao atualizar o status da reserva:", error);
       alert("Erro ao atualizar o status da reserva");
+    }
+  };
+
+  const handleDeleteReservation = async (reservationId: number) => {
+    try {
+      console.log("Excluindo reserva com ID:", reservationId); // Log para depuração
+
+      const response = await fetch(`${api}/reservation/${reservationId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Falha ao excluir a reserva");
+      }
+
+      // Atualiza a lista de reservas após a exclusão
+      setReservations((prevReservations) =>
+        prevReservations.filter((reservation) => reservation.id !== reservationId)
+      );
+
+      console.log("Reserva excluída com sucesso");
+    } catch (error) {
+      console.error("Erro ao excluir a reserva:", error);
+      alert("Erro ao excluir a reserva");
     }
   };
 
@@ -149,7 +176,7 @@ export default function MinhasReservas() {
       )
     : reservations;
 
-  const adjustTimezone = (dateString) => {
+  const adjustTimezone = (dateString: string) => {
     const date = new Date(dateString);
     const offset = date.getTimezoneOffset() / 60;
     date.setHours(date.getHours() - offset);
@@ -279,6 +306,15 @@ export default function MinhasReservas() {
                           >
                             Chat
                           </button>
+
+                          {activeTab === "realizadas" && (
+                            <button
+                              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                              onClick={() => handleDeleteReservation(reservation.id)}
+                            >
+                              Excluir
+                            </button>
+                          )}
 
                           {activeTab === "recebidas" &&
                             reservation.tool.userId === session?.user?.id && (
