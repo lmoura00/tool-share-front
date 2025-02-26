@@ -6,6 +6,8 @@ import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 
+
+
 export default function HeaderPrivate() {
   const router = useRouter();
   const { data: session } = useSession();
@@ -17,7 +19,7 @@ export default function HeaderPrivate() {
     setIsPopupVisible(!isPopupVisible);
   };
 
-  // Função para buscar notificações
+  
   const fetchNotifications = async () => {
     try {
       const response = await fetch(`${api}/notifications`, {
@@ -34,6 +36,7 @@ export default function HeaderPrivate() {
 
  
   useEffect(() => {
+
     fetchNotifications(); 
 
     const interval = setInterval(fetchNotifications, 1000); 
@@ -46,7 +49,7 @@ export default function HeaderPrivate() {
     setIsNotificationVisible(!isNotificationVisible);
   };
 
-  const markNotificationAsRead = async (notificationId) => {
+  const markNotificationAsRead = async (notificationId: number) => {
     try {
       const response = await fetch(`${api}/notifications/${notificationId}/mark-as-read`, {
         method: 'PUT',
@@ -60,7 +63,7 @@ export default function HeaderPrivate() {
         throw new Error('Falha ao marcar notificação como lida');
       }
 
-      // Atualiza o estado das notificações para refletir a mudança
+      
       setNotifications((prevNotifications) =>
         prevNotifications.map((notification) =>
           notification.id === notificationId ? { ...notification, read: true } : notification
@@ -72,7 +75,7 @@ export default function HeaderPrivate() {
     }
   };
 
-  const deleteNotification = async (notificationId) => {
+  const deleteNotification = async (notificationId: number) => {
     try {
       const response = await fetch(`${api}/notifications/${notificationId}`, {
         method: 'DELETE',
@@ -86,7 +89,7 @@ export default function HeaderPrivate() {
         throw new Error('Falha ao apagar notificação');
       }
 
-      // Atualiza o estado das notificações removendo a notificação apagada
+     
       setNotifications((prevNotifications) =>
         prevNotifications.filter((notification) => notification.id !== notificationId)
       );
@@ -105,9 +108,11 @@ export default function HeaderPrivate() {
       alert("Failed to logout. Please try again.");
     }
   };
+  let unreadNotificationsCount
 
-  // Contar notificações não lidas
-  const unreadNotificationsCount = notifications.filter(notification => !notification.read).length;
+  if(session?.accessToken){
+    unreadNotificationsCount = notifications.filter(notification => !notification.read).length;
+  }
 
   return (
     <div>

@@ -169,6 +169,7 @@ export default function ToolDetailsPage() {
 
       alert("Ferramenta alugada com sucesso!");
       setIsRentModalOpen(false);
+      router.push('/minhas-reservas')
     } catch (error) {
       console.error("Error renting tool:", error);
       alert("Erro ao alugar ferramenta.");
