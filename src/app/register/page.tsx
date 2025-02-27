@@ -7,20 +7,31 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import HeaderPublic from "../components/headerPublic";
 import { useState, useRef } from "react";
-import { useLoadScript, Autocomplete, GoogleMap, Marker } from "@react-google-maps/api";
+import {
+  useLoadScript,
+  Autocomplete,
+  GoogleMap,
+  Marker,
+} from "@react-google-maps/api";
 import Image from "next/image";
 import { api } from "../api";
 
 const schema = z.object({
-  name: z.string().nonempty("O campo nome é obrigatório"),
-  email: z.string().email("Email inválido").nonempty("O campo email é obrigatório"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres").nonempty("O campo senha é obrigatório"),
+  name: z.string().nonempty("O campo nome é obrigatório").min(4, "O tamanho minimo de nome é de 4 caracteres"),
+  email: z
+    .string()
+    .email("Email inválido")
+    .nonempty("O campo email é obrigatório"),
+  password: z
+    .string()
+    .min(6, "A senha deve ter pelo menos 6 caracteres")
+    .nonempty("O campo senha é obrigatório"),
   phone: z.string().nonempty("O campo telefone é obrigatório"),
   cpf: z.string().nonempty("O campo CPF é obrigatório"),
   address: z.string().nonempty("O campo endereço é obrigatório"),
-  latitude: z.string().optional(),
-  longitude: z.string().optional(),
-  image: z.string().optional(),
+  latitude: z.string().nonempty(),
+  longitude: z.string().nonempty(),
+  image: z.string().nonempty("Uma foto é necessária para personalização"),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -44,7 +55,9 @@ export default function RegisterPage() {
     mode: "onChange",
   });
 
-  const LIBRARIES: ("places" | "drawing" | "geometry" | "visualization")[] = ["places"];
+  const LIBRARIES: ("places" | "drawing" | "geometry" | "visualization")[] = [
+    "places",
+  ];
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -257,7 +270,10 @@ export default function RegisterPage() {
               <div className="w-full h-64 rounded-lg overflow-hidden">
                 <GoogleMap
                   mapContainerStyle={{ width: "100%", height: "100%" }}
-                  center={{ lat: latitude || -5.111502004315972, lng: longitude || -42.85387871534339 }}
+                  center={{
+                    lat: latitude || -5.111502004315972,
+                    lng: longitude || -42.85387871534339,
+                  }}
                   zoom={15}
                   onLoad={(map) => {
                     mapRef.current = map;
@@ -282,7 +298,9 @@ export default function RegisterPage() {
                 }}
                 className="w-full p-2 rounded-lg border-2 border-black"
               />
-              {isUploading && <p className="text-sm mt-2">Carregando imagem...</p>}
+              {isUploading && (
+                <p className="text-sm mt-2">Carregando imagem...</p>
+              )}
               {imageUrl && (
                 <div className="flex mt-2 items-center justify-center">
                   <Image
@@ -293,6 +311,11 @@ export default function RegisterPage() {
                     className="w-50 h-50 rounded-full object-cover"
                   />
                 </div>
+              )}
+              {errors.image && (
+                <span className="text-red-500 text-sm">
+                  {errors.image.message}
+                </span>
               )}
             </div>
 

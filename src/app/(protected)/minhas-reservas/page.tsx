@@ -14,7 +14,7 @@ interface Reservation {
   startDate: string;
   endDate: string;
   totalPrice: number;
-  status: "pendente" | "confirmada" | "cancelada";
+  status: "pendente" | "confirmada" | "cancelada" | "finalizada";
   createdAt: string;
   updatedAt: string;
   tool: {
@@ -37,16 +37,19 @@ export default function MinhasReservas() {
   const router = useRouter();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"realizadas" | "recebidas">(
-    "realizadas"
-  );
+  const [activeTab, setActiveTab] = useState<"realizadas" | "recebidas">("realizadas");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Estados para o modal de avaliação
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
+  const [rating, setRating] = useState(0); // Avaliação de 0 a 5
+  const [comment, setComment] = useState(""); // Comentário opcional
 
   useEffect(() => {
     if (sessionStatus === "authenticated") {
       fetchReservations();
 
-      // Atualiza as reservas a cada segundo (opcional)
       const intervalId = setInterval(fetchReservations, 1000);
 
       return () => clearInterval(intervalId);
@@ -83,26 +86,20 @@ export default function MinhasReservas() {
     }
   };
 
-  const handleChat = (reservationId: number) => {
-    console.log("Abrir chat para reserva:", reservationId);
-  };
 
   const handleStatusChange = async (
     reservationId: number,
-    newStatus: "pendente" | "confirmada" | "cancelada"
+    newStatus: "pendente" | "confirmada" | "cancelada" | "finalizada"
   ) => {
     try {
-      const response = await fetch(
-        `${api}/reservations/${reservationId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.accessToken}`,
-          },
-          body: JSON.stringify({ status: newStatus }),
-        }
-      );
+      const response = await fetch(`${api}/reservations/${reservationId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
       if (!response.ok) {
         throw new Error("Falha ao atualizar o status da reserva");
@@ -110,8 +107,6 @@ export default function MinhasReservas() {
 
       const data = await response.json();
       console.log(data.message);
-
-      // Atualiza o status da reserva no estado local
       setReservations((prevReservations) =>
         prevReservations.map((reservation) =>
           reservation.id === reservationId
@@ -127,7 +122,7 @@ export default function MinhasReservas() {
 
   const handleDeleteReservation = async (reservationId: number) => {
     try {
-      console.log("Excluindo reserva com ID:", reservationId); // Log para depuração
+      console.log("Excluindo reserva com ID:", reservationId);
 
       const response = await fetch(`${api}/reservation/${reservationId}`, {
         method: "DELETE",
@@ -153,6 +148,54 @@ export default function MinhasReservas() {
     }
   };
 
+  const handleSubmitRating = async () => {
+    try {
+      // Encontre a reserva selecionada
+      const reservation = reservations.find((r) => r.id === selectedReservationId);
+      if (!reservation) {
+        throw new Error("Reserva não encontrada");
+      }
+  
+      // Verifique o token e o corpo da requisição
+      console.log("Token:", session?.accessToken);
+      console.log("Tool ID:", reservation.tool.id);
+      console.log("Rating:", rating);
+  
+      const body = JSON.stringify({ rating: rating });
+      console.log("Request Body:", body);
+  
+      // Envie a avaliação para o backend
+      const response = await fetch(`${api}/tools/${reservation.tool.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+        body: body,
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json(); // Captura a resposta de erro do backend
+        console.error("Erro no backend:", errorData);
+        throw new Error("Falha ao enviar a avaliação");
+      }
+  
+      const data = await response.json();
+      console.log(data.message);
+  
+      setIsRatingModalOpen(false);
+      setRating(0);
+      setComment("");
+      setSelectedReservationId(null);
+  
+      // Atualizar a lista de reservas
+      fetchReservations();
+    } catch (error) {
+      console.error("Erro ao enviar a avaliação:", error);
+      alert("Erro ao enviar a avaliação");
+    }
+  };
+
   if (sessionStatus === "loading" || loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -175,13 +218,6 @@ export default function MinhasReservas() {
         (reservation) => reservation.tool.category === selectedCategory
       )
     : reservations;
-
-  const adjustTimezone = (dateString: string) => {
-    const date = new Date(dateString);
-    const offset = date.getTimezoneOffset() / 60;
-    date.setHours(date.getHours() - offset);
-    return date;
-  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col mb-11">
@@ -294,27 +330,38 @@ export default function MinhasReservas() {
                                 ? "bg-green-500 text-white"
                                 : reservation.status === "cancelada"
                                 ? "bg-red-500 text-white"
+                                : reservation.status === "finalizada"
+                                ? "bg-purple-500 text-white"
                                 : "bg-yellow-500 text-black"
                             }`}
                           >
                             {reservation.status}
                           </span>
 
-                          <button
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            onClick={() => handleChat(reservation.id)}
-                          >
-                            Chat
-                          </button>
+                          {activeTab === "realizadas" &&
+                            reservation.status !== "finalizada" &&  reservation.status !== "confirmada"&& (
+                              <button
+                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                onClick={() =>
+                                  handleDeleteReservation(reservation.id)
+                                }
+                              >
+                                Excluir
+                              </button>
+                            )}
 
-                          {activeTab === "realizadas" && (
-                            <button
-                              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                              onClick={() => handleDeleteReservation(reservation.id)}
-                            >
-                              Excluir
-                            </button>
-                          )}
+                          {activeTab === "realizadas" &&
+                            reservation.status === "finalizada" && (
+                              <button
+                                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                                onClick={() => {
+                                  setSelectedReservationId(reservation.id);
+                                  setIsRatingModalOpen(true);
+                                }}
+                              >
+                                Avaliar Ferramenta
+                              </button>
+                            )}
 
                           {activeTab === "recebidas" &&
                             reservation.tool.userId === session?.user?.id && (
@@ -327,6 +374,7 @@ export default function MinhasReservas() {
                                       | "pendente"
                                       | "confirmada"
                                       | "cancelada"
+                                      | "finalizada"
                                   )
                                 }
                                 className="px-4 py-2 border rounded"
@@ -334,6 +382,7 @@ export default function MinhasReservas() {
                                 <option value="pendente">Pendente</option>
                                 <option value="confirmada">Confirmada</option>
                                 <option value="cancelada">Cancelada</option>
+                                <option value="finalizada">Finalizada</option>
                               </select>
                             )}
                         </div>
@@ -341,17 +390,15 @@ export default function MinhasReservas() {
                       <div className="mt-4">
                         <p>
                           <strong>Data Inicial:</strong>{" "}
-                          {new Date(reservation.startDate).toLocaleString(
-                            "pt-BR",
-                            { timeZone: "UTC" }
-                          )}
+                          {new Date(reservation.startDate).toLocaleString("pt-BR", {
+                            timeZone: "UTC",
+                          })}
                         </p>
                         <p>
                           <strong>Data Final:</strong>{" "}
-                          {new Date(reservation.endDate).toLocaleString(
-                            "pt-BR",
-                            { timeZone: "UTC" }
-                          )}
+                          {new Date(reservation.endDate).toLocaleString("pt-BR", {
+                            timeZone: "UTC",
+                          })}
                         </p>
                       </div>
                     </div>
@@ -362,6 +409,51 @@ export default function MinhasReservas() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Avaliação */}
+      {isRatingModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Avaliar Ferramenta</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Nota (0 a 5)</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  value={rating}
+                  onChange={(e) => setRating(Number(e.target.value))}
+                  className="w-full px-3 py-2 border rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Comentário (opcional)</label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="w-full px-3 py-2 border rounded"
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setIsRatingModalOpen(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSubmitRating}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Enviar Avaliação
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer className="mt-auto">
         <Footer />

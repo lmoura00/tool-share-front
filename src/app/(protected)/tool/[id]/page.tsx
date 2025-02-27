@@ -335,6 +335,7 @@ export default function ToolDetailsPage() {
               {"☆".repeat(tool ? 5 - Math.floor(tool.rating) : 5)}
             </span>
           </div>
+          
 
           <div className="mt-6 space-x-4">
             {isOwner ? (

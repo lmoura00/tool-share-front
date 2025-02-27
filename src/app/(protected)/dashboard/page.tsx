@@ -26,15 +26,14 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetchTools(); // Fetch tools immediately on component mount
+      fetchTools(); 
 
-      const intervalId = setInterval(fetchTools, 1000); // Fetch tools every 1 second
-
-      return () => clearInterval(intervalId); // Cleanup interval on component unmount
+      const intervalId = setInterval(fetchTools, 1000); 
+      return () => clearInterval(intervalId); 
     } else if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, router, session?.accessToken]); // Add session?.accessToken to dependency array
+  }, [status, router, session?.accessToken]); 
 
   const fetchTools = async () => {
     try {
@@ -91,29 +90,6 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
               {availableTools.map((tool) => (
-                <ToolCard
-                  key={tool.id}
-                  id={tool.id}
-                  name={tool.name}
-                  price={`R$${tool.price.toFixed(2)}/h`}
-                  rating={tool.rating}
-                  image={tool.image}
-                  description={tool.description}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="mt-10 mb-20">
-          <h2 className="text-lg md:text-xl font-semibold">
-            Ferramentas Alugadas
-          </h2>
-          {rentedTools.length === 0 ? (
-            <p className="text-gray-600 mt-4">Nenhuma ferramenta alugada.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-4">
-              {rentedTools.map((tool) => (
                 <ToolCard
                   key={tool.id}
                   id={tool.id}

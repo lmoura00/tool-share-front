@@ -15,11 +15,49 @@ export default function HeaderPrivate() {
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
-  const togglePopup = () => {
-    setIsPopupVisible(!isPopupVisible);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notificationPopup = document.querySelector(".notification-popup");
+      const profilePopup = document.querySelector(".profile-popup");
+
+      if (
+        isNotificationVisible &&
+        notificationPopup &&
+        !notificationPopup.contains(event.target) &&
+        !event.target.closest(".notification-button") 
+      ) {
+        setIsNotificationVisible(false);
+      }
+
+      if (
+        isPopupVisible &&
+        profilePopup &&
+        !profilePopup.contains(event.target) &&
+        !event.target.closest(".profile-button")
+      ) {
+        setIsPopupVisible(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isNotificationVisible, isPopupVisible]);
+
+ 
+  const toggleNotification = () => {
+    setIsPopupVisible(false); 
+    setIsNotificationVisible((prev) => !prev); 
   };
 
   
+  const togglePopup = () => {
+    setIsNotificationVisible(false); 
+    setIsPopupVisible((prev) => !prev); 
+  };
+
   const fetchNotifications = async () => {
     try {
       const response = await fetch(`${api}/notifications`, {
@@ -45,9 +83,7 @@ export default function HeaderPrivate() {
     return () => clearInterval(interval);
   }, [session]);
 
-  const toggleNotification = () => {
-    setIsNotificationVisible(!isNotificationVisible);
-  };
+
 
   const markNotificationAsRead = async (notificationId: number) => {
     try {
