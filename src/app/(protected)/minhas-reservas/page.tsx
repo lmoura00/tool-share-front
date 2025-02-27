@@ -32,17 +32,30 @@ interface Reservation {
   };
 }
 
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+}
+
 export default function MinhasReservas() {
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"realizadas" | "recebidas">("realizadas");
+  const [activeTab, setActiveTab] = useState<"realizadas" | "recebidas">(
+    "realizadas"
+  );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const [users, setUsers] = useState<{ [key: number]: User }>({});
 
   // Estados para o modal de avaliação
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
-  const [selectedReservationId, setSelectedReservationId] = useState<number | null>(null);
+  const [selectedReservationId, setSelectedReservationId] = useState<
+    number | null
+  >(null);
   const [rating, setRating] = useState(0); // Avaliação de 0 a 5
   const [comment, setComment] = useState(""); // Comentário opcional
 
@@ -79,6 +92,17 @@ export default function MinhasReservas() {
 
       const data = await response.json();
       setReservations(data);
+
+      // Buscar informações dos usuários
+      const userIds = data.map(
+        (reservation: Reservation) => reservation.userId
+      );
+      const toolUserIds = data.map(
+        (reservation: Reservation) => reservation.tool.userId
+      );
+      const uniqueUserIds = Array.from(new Set([...userIds, ...toolUserIds]));
+
+      await fetchUsers(uniqueUserIds);
     } catch (error) {
       console.error("Error fetching reservations:", error);
     } finally {
@@ -86,20 +110,49 @@ export default function MinhasReservas() {
     }
   };
 
+  const fetchUsers = async (userIds: number[]) => {
+    try {
+      const usersData: { [key: number]: User } = {};
+
+      for (const userId of userIds) {
+        const response = await fetch(`${api}/user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.accessToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user with ID ${userId}`);
+        }
+
+        const user = await response.json();
+        usersData[userId] = user;
+      }
+
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
   const handleStatusChange = async (
     reservationId: number,
     newStatus: "pendente" | "confirmada" | "cancelada" | "finalizada"
   ) => {
     try {
-      const response = await fetch(`${api}/reservations/${reservationId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.accessToken}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      const response = await fetch(
+        `${api}/reservations/${reservationId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.accessToken}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Falha ao atualizar o status da reserva");
@@ -138,7 +191,9 @@ export default function MinhasReservas() {
 
       // Atualiza a lista de reservas após a exclusão
       setReservations((prevReservations) =>
-        prevReservations.filter((reservation) => reservation.id !== reservationId)
+        prevReservations.filter(
+          (reservation) => reservation.id !== reservationId
+        )
       );
 
       console.log("Reserva excluída com sucesso");
@@ -151,19 +206,21 @@ export default function MinhasReservas() {
   const handleSubmitRating = async () => {
     try {
       // Encontre a reserva selecionada
-      const reservation = reservations.find((r) => r.id === selectedReservationId);
+      const reservation = reservations.find(
+        (r) => r.id === selectedReservationId
+      );
       if (!reservation) {
         throw new Error("Reserva não encontrada");
       }
-  
+
       // Verifique o token e o corpo da requisição
       console.log("Token:", session?.accessToken);
       console.log("Tool ID:", reservation.tool.id);
       console.log("Rating:", rating);
-  
+
       const body = JSON.stringify({ rating: rating });
       console.log("Request Body:", body);
-  
+
       // Envie a avaliação para o backend
       const response = await fetch(`${api}/tools/${reservation.tool.id}`, {
         method: "PUT",
@@ -173,21 +230,21 @@ export default function MinhasReservas() {
         },
         body: body,
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json(); // Captura a resposta de erro do backend
         console.error("Erro no backend:", errorData);
         throw new Error("Falha ao enviar a avaliação");
       }
-  
+
       const data = await response.json();
       console.log(data.message);
-  
+
       setIsRatingModalOpen(false);
       setRating(0);
       setComment("");
       setSelectedReservationId(null);
-  
+
       // Atualizar a lista de reservas
       fetchReservations();
     } catch (error) {
@@ -339,7 +396,8 @@ export default function MinhasReservas() {
                           </span>
 
                           {activeTab === "realizadas" &&
-                            reservation.status !== "finalizada" &&  reservation.status !== "confirmada"&& (
+                            reservation.status !== "finalizada" &&
+                            reservation.status !== "confirmada" && (
                               <button
                                 className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                                 onClick={() =>
@@ -390,16 +448,66 @@ export default function MinhasReservas() {
                       <div className="mt-4">
                         <p>
                           <strong>Data Inicial:</strong>{" "}
-                          {new Date(reservation.startDate).toLocaleString("pt-BR", {
-                            timeZone: "UTC",
-                          })}
+                          {new Date(reservation.startDate).toLocaleString(
+                            "pt-BR",
+                            {
+                              timeZone: "UTC",
+                            }
+                          )}
                         </p>
                         <p>
                           <strong>Data Final:</strong>{" "}
-                          {new Date(reservation.endDate).toLocaleString("pt-BR", {
-                            timeZone: "UTC",
-                          })}
+                          {new Date(reservation.endDate).toLocaleString(
+                            "pt-BR",
+                            {
+                              timeZone: "UTC",
+                            }
+                          )}
                         </p>
+
+                        {/* Exibir informações do dono da ferramenta (Reservas Realizadas) */}
+                        {activeTab === "realizadas" &&
+                          users[reservation.tool.userId] && (
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                              <h4 className="font-semibold text-lg">
+                                Informações do Dono da Ferramenta:
+                              </h4>
+                              <p>
+                                <strong>Nome:</strong>{" "}
+                                {users[reservation.tool.userId].name}
+                              </p>
+                              <p>
+                                <strong>Email:</strong>{" "}
+                                {users[reservation.tool.userId].email}
+                              </p>
+                              <p>
+                                <strong>Telefone:</strong>{" "}
+                                {users[reservation.tool.userId].phone}
+                              </p>
+                            </div>
+                          )}
+
+                        {/* Exibir informações do usuário que está alugando (Reservas Recebidas) */}
+                        {activeTab === "recebidas" &&
+                          users[reservation.userId] && (
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                              <h4 className="font-semibold text-lg">
+                                Informações do Locatário:
+                              </h4>
+                              <p>
+                                <strong>Nome:</strong>{" "}
+                                {users[reservation.userId].name}
+                              </p>
+                              <p>
+                                <strong>Email:</strong>{" "}
+                                {users[reservation.userId].email}
+                              </p>
+                              <p>
+                                <strong>Telefone:</strong>{" "}
+                                {users[reservation.userId].phone}
+                              </p>
+                            </div>
+                          )}
                       </div>
                     </div>
                   </div>
@@ -417,7 +525,9 @@ export default function MinhasReservas() {
             <h2 className="text-xl font-bold mb-4">Avaliar Ferramenta</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Nota (0 a 5)</label>
+                <label className="block text-sm font-medium mb-1">
+                  Nota (0 a 5)
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -428,7 +538,9 @@ export default function MinhasReservas() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Comentário (opcional)</label>
+                <label className="block text-sm font-medium mb-1">
+                  Comentário (opcional)
+                </label>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}

@@ -165,16 +165,6 @@ export default function HeaderPrivate() {
           }}
         />
 
-        <div className="flex items-center rounded w-1/3">
-          <input
-            type="text"
-            placeholder="Pesquisar ferramenta..."
-            className="w-full px-4 py-2 rounded-l focus:outline-none outline-none"
-          />
-          <button className="bg-[#EF8D2A] text-white p-3 rounded-r hover:bg-[#cc7a24] transition-colors">
-            <FaSearch />
-          </button>
-        </div>
 
         <div className="flex items-center space-x-4 mr-10 relative">
           <button

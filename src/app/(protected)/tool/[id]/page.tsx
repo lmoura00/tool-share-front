@@ -64,6 +64,27 @@ export default function ToolDetailsPage() {
     }
   }, [id, session]);
 
+  const fetchAllUsers = async () => {
+    try {
+      const response = await fetch(`${api}/user/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+  
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      return [];
+    }
+  };
+
   const fetchToolDetails = async () => {
     try {
       const toolResponse = await fetch(`${api}/tool/${id}`, {
@@ -128,29 +149,60 @@ export default function ToolDetailsPage() {
 
   const handleRentTool = async () => {
     if (!startDate || !endDate || !tool) return;
-
+  
     const start = new Date(startDate);
     const end = new Date(endDate);
-
+  
     if (end <= start) {
       alert("A data final deve ser maior que a data inicial.");
       return;
     }
-
+  
+    // Buscar todos os usuários
+    const users = await fetchAllUsers();
+  
+    // Verificar se há reservas confirmadas que se sobrepõem ao período desejado
+    let hasConflict = false;
+  
+    users.forEach((user: any) => {
+      user.reservations.forEach((reservation: any) => {
+        if (
+          reservation.toolId === tool.id &&
+          reservation.status === "confirmada"
+        ) {
+          const reservationStart = new Date(reservation.startDate);
+          const reservationEnd = new Date(reservation.endDate);
+  
+          if (
+            (start >= reservationStart && start < reservationEnd) ||
+            (end > reservationStart && end <= reservationEnd) ||
+            (start <= reservationStart && end >= reservationEnd)
+          ) {
+            hasConflict = true;
+          }
+        }
+      });
+    });
+  
+    if (hasConflict) {
+      alert("Já existe uma reserva confirmada para este período.");
+      return;
+    }
+  
     const startDateISO = new Date(
       start.getTime() - start.getTimezoneOffset() * 60000
     ).toISOString();
     const endDateISO = new Date(
       end.getTime() - end.getTimezoneOffset() * 60000
     ).toISOString();
-
+  
     const payload = {
       tool_id: tool.id,
       start_date: startDateISO,
       end_date: endDateISO,
       status: "pendente",
     };
-
+  
     try {
       const response = await fetch(`${api}/reservation`, {
         method: "POST",
@@ -160,16 +212,16 @@ export default function ToolDetailsPage() {
         },
         body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Erro do backend:", errorData);
         throw new Error("Failed to rent tool");
       }
-
+  
       alert("Ferramenta alugada com sucesso!");
       setIsRentModalOpen(false);
-      router.push('/minhas-reservas')
+      router.push('/minhas-reservas');
     } catch (error) {
       console.error("Error renting tool:", error);
       alert("Erro ao alugar ferramenta.");
